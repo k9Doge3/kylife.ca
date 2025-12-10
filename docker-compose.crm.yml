@@ -1,0 +1,45 @@
+services:
+  espocrm:
+    image: espocrm/espocrm:latest
+    container_name: kylife-crm
+    restart: unless-stopped
+    environment:
+      - ESPOCRM_DATABASE_HOST=kylife-crm-db
+      - ESPOCRM_DATABASE_USER=espocrm
+      - ESPOCRM_DATABASE_PASSWORD=${ESPOCRM_DB_PASSWORD:-changeme_kylife_crm}
+      - ESPOCRM_ADMIN_USERNAME=${ESPOCRM_ADMIN_USER:-admin}
+      - ESPOCRM_ADMIN_PASSWORD=${ESPOCRM_ADMIN_PASSWORD:-changeme_admin}
+      - ESPOCRM_SITE_URL=https://crm.kylife.ca
+    volumes:
+      - kylife-crm-data:/var/www/html
+    ports:
+      - "8084:80"
+    depends_on:
+      - espocrm-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/App/user"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  espocrm-db:
+    image: mysql:8.0
+    container_name: kylife-crm-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-changeme_root}
+      - MYSQL_DATABASE=espocrm
+      - MYSQL_USER=espocrm
+      - MYSQL_PASSWORD=${ESPOCRM_DB_PASSWORD:-changeme_kylife_crm}
+    volumes:
+      - kylife-crm-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  kylife-crm-data:
+  kylife-crm-db-data:

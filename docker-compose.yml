@@ -1,0 +1,13 @@
+services:
+  kylife-web:
+    build:
+      args:
+        VITE_CLERK_PUBLISHABLE_KEY: "${VITE_CLERK_PUBLISHABLE_KEY:-}"
+      context: .
+      dockerfile: Dockerfile
+    container_name: kylife-web
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3002:80"
+    restart: unless-stopped

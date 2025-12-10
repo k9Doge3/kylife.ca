@@ -1,0 +1,75 @@
+services:
+  photoprism-db:
+    command: >-
+      --transaction-isolation=READ-COMMITTED
+      --binlog-format=ROW
+      --innodb-read-only-compressed=OFF
+    container_name: photoprism-db
+    environment:
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_INITDB_SKIP_TZINFO=1
+      - MARIADB_DATABASE=${PHOTOPRISM_DB_NAME:-photoprism}
+      - MARIADB_USER=${PHOTOPRISM_DB_USER:-photoprism}
+      - MARIADB_PASSWORD=${PHOTOPRISM_DB_PASSWORD:-photoprism-pass}
+      - MARIADB_ROOT_PASSWORD=${PHOTOPRISM_DB_ROOT_PASSWORD:-photoprism-root}
+    image: mariadb:10.11
+    restart: unless-stopped
+    volumes:
+      - ./database/mysql:/var/lib/mysql
+
+  photoprism-private:
+    container_name: photoprism-private
+    depends_on:
+      - photoprism-db
+    environment:
+      - PHOTOPRISM_ADMIN_PASSWORD=${PHOTOPRISM_PRIVATE_ADMIN_PASSWORD:-change-me-private}
+      - PHOTOPRISM_ADMIN_USER=${PHOTOPRISM_PRIVATE_ADMIN_USER:-admin}
+      - PHOTOPRISM_AUTO_IMPORT=0
+      - PHOTOPRISM_AUTO_INDEX=1
+      - PHOTOPRISM_DATABASE_DRIVER=mysql
+      - PHOTOPRISM_DATABASE_NAME=${PHOTOPRISM_DB_NAME:-photoprism}
+      - PHOTOPRISM_DATABASE_PASSWORD=${PHOTOPRISM_DB_PASSWORD:-photoprism-pass}
+      - PHOTOPRISM_DATABASE_SERVER=photoprism-db:3306
+      - PHOTOPRISM_DATABASE_USER=${PHOTOPRISM_DB_USER:-photoprism}
+      - PHOTOPRISM_DEBUG=0
+      - PHOTOPRISM_ORIGINALS_LIMIT=5000
+      - PHOTOPRISM_PUBLIC=0
+      - PHOTOPRISM_READONLY=0
+      - PHOTOPRISM_SITE_URL=${PHOTOPRISM_PRIVATE_URL:-https://ops.kylife.ca/photos/}
+      - PHOTOPRISM_WORKERS=2
+    image: photoprism/photoprism:latest
+    ports:
+      - "2343:2342"
+    restart: unless-stopped
+    volumes:
+      - ./storage/photoprism/private/originals:/photoprism/originals
+      - ./storage/photoprism/private/storage:/photoprism/storage
+
+  photoprism-public:
+    container_name: photoprism-public
+    depends_on:
+      - photoprism-db
+    environment:
+      - PHOTOPRISM_ADMIN_PASSWORD=${PHOTOPRISM_PUBLIC_ADMIN_PASSWORD:-change-me-public}
+      - PHOTOPRISM_ADMIN_USER=${PHOTOPRISM_PUBLIC_ADMIN_USER:-admin}
+      - PHOTOPRISM_AUTO_IMPORT=0
+      - PHOTOPRISM_AUTO_INDEX=1
+      - PHOTOPRISM_DATABASE_DRIVER=mysql
+      - PHOTOPRISM_DATABASE_NAME=${PHOTOPRISM_DB_NAME:-photoprism}
+      - PHOTOPRISM_DATABASE_PASSWORD=${PHOTOPRISM_DB_PASSWORD:-photoprism-pass}
+      - PHOTOPRISM_DATABASE_SERVER=photoprism-db:3306
+      - PHOTOPRISM_DATABASE_USER=${PHOTOPRISM_DB_USER:-photoprism}
+      - PHOTOPRISM_DEBUG=0
+      - PHOTOPRISM_ORIGINALS_LIMIT=5000
+      - PHOTOPRISM_PUBLIC=1
+      - PHOTOPRISM_READONLY=0
+      - PHOTOPRISM_SITE_URL=${PHOTOPRISM_PUBLIC_URL:-https://photos.kylife.ca/}
+      - PHOTOPRISM_WORKERS=2
+    image: photoprism/photoprism:latest
+    ports:
+      - "2342:2342"
+    restart: unless-stopped
+    volumes:
+      - ./storage/photoprism/public/originals:/photoprism/originals
+      - ./storage/photoprism/public/storage:/photoprism/storage
+
