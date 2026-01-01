@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-<<<<<<< HEAD
-=======
-import ContactForm from './ContactForm'
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
 import { useNavigate } from 'react-router-dom'
 
 type MenuItem = {
@@ -16,11 +12,7 @@ type MenuItem = {
   status: string
 }
 
-<<<<<<< HEAD
 type MenuMode = 'main' | 'newGame' | 'systems' | 'comms' | 'botnet'
-=======
-type MenuMode = 'main' | 'newGame' | 'systems' | 'comms'
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
 
 const BASE_MENU_ITEMS: MenuItem[] = [
   {
@@ -38,30 +30,20 @@ const BASE_MENU_ITEMS: MenuItem[] = [
     status: 'Channel Integrity: STABLE'
   },
   {
-<<<<<<< HEAD
     id: 'communication-channels',
     label: 'COMMUNICATION CHANNELS',
-=======
-    id: 'social-media',
-    label: 'SOCIAL MEDIA',
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     description: 'Open secure frequencies, direct transmissions, and broadcast relays for the ops team.',
     detail: 'Routing Matrix: Multi-spectrum uplink // Response Window: Active',
     status: 'Signal Status: OPERATIONAL'
   },
   {
     id: 'view-readme',
-<<<<<<< HEAD
     label: 'VIEW README.TXT',
-=======
-    label: 'CONTACT INFORMATION',
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     href: 'https://github.com/k9Doge3',
     description: 'Inspect documentation, changelogs, and build notes recovered from the archives.',
     detail: 'External Mirror: GitHub Operations Log',
     status: 'OpSec: PUBLIC'
   },
-<<<<<<< HEAD
   {
     id: 'login',
     label: 'LOGIN',
@@ -89,11 +71,6 @@ interface SubMenuOption {
   external?: boolean
 }
 
-=======
-  // ...existing code...
-]
-
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
 interface SubMenuConfig {
   key: string
   title: string
@@ -114,7 +91,6 @@ const NEW_GAME_OPTIONS: SubMenuOption[] = [
   }
 ]
 
-<<<<<<< HEAD
 const BOTNET_OPTIONS: SubMenuOption[] = [
   {
     id: 'qt314-node',
@@ -159,53 +135,29 @@ const CONNECTED_SYSTEMS_OPTIONS: SubMenuOption[] = [
     label: 'Photo Gallery',
     description: 'PhotoPrism gallery instance with AI-powered organization.',
     href: 'https://gallery.kylife.ca',
-=======
-
-const CONNECTED_SYSTEMS_OPTIONS: SubMenuOption[] = [
-  {
-    id: 'ebay-store',
-    label: 'EBAY STORE',
-    description: 'Shop our eBay listings online.',
-    href: 'https://www.ebay.ca/sch/i.html?item=358072326364&rt=nc&_trksid=p4429486.m3561.l161211&_ssn=kayou_8264',
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     status: 'ONLINE',
     category: 'media',
     external: true
   },
   {
-<<<<<<< HEAD
     id: 'private',
     label: 'Admin Gallery',
     description: 'Private PhotoPrism management dashboard.',
     href: 'https://admin.kylife.ca',
-=======
-    id: 'shopify-store',
-    label: 'SHOPIFY STORE',
-    description: 'Visit our Shopify storefront.',
-    href: 'https://kystore-9434.myshopify.com/',
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     status: 'ONLINE',
     category: 'admin',
     external: true
   },
   {
-<<<<<<< HEAD
     id: 'espo-crm',
     label: 'EspoCRM',
     description: 'Customer relationship management system.',
     href: 'https://crm.wildrosepainters.ca',
-=======
-    id: 'wealthwave-digital',
-    label: 'WealthWave digital',
-    description: 'WealthWave digital platform.',
-    href: 'https://wealthwave-digital.vercel.app/',
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     status: 'ONLINE',
     category: 'business',
     external: true
   },
   {
-<<<<<<< HEAD
     id: 'github-projects',
     label: 'GitHub Projects',
     description: 'Open source repositories and contributions.',
@@ -273,68 +225,6 @@ const COMMUNICATION_CHANNELS_OPTIONS: SubMenuOption[] = [
     href: '#',
     status: 'CLASSIFIED',
     category: 'video'
-=======
-    id: 'wildrose-painters',
-    label: 'Wildrose Painters',
-    description: 'Wildrose Painters website.',
-    href: 'https://www.wildrosepainters.ca',
-    status: 'ONLINE',
-    category: 'business',
-    external: true
-  },
-  {
-    id: 'kygroup',
-    label: 'KYgroup',
-    description: 'KYgroup website.',
-    href: 'https://www.kygroup.ca/',
-    status: 'ONLINE',
-    category: 'business',
-    external: true
-  },
-  {
-    id: 'edmonton-cars',
-    label: 'Edmonton-cars.ca',
-    description: 'Edmonton-cars.ca website.',
-    href: 'https://www.edmonton-cars.ca/',
-    status: 'ONLINE',
-    category: 'business',
-    external: true
-  }
-]
-
-const SOCIAL_MEDIA_OPTIONS: SubMenuOption[] = [
-  {
-    id: 'github',
-    label: 'github',
-    description: 'Visit my GitHub profile.',
-    href: 'https://github.com/k9Doge3',
-    status: 'ONLINE',
-    external: true
-  },
-  {
-    id: 'facebook',
-    label: 'FACEBOOK',
-    description: 'Connect on Facebook.',
-    href: 'https://www.facebook.com/karimyoussef6994',
-    status: 'ONLINE',
-    external: true
-  },
-  {
-    id: 'instagram',
-    label: 'INSTAGRAM',
-    description: 'Follow on Instagram.',
-    href: 'https://www.instagram.com/ky.base/',
-    status: 'ONLINE',
-    external: true
-  },
-  {
-    id: 'tiktok',
-    label: 'TIKTOK',
-    description: 'Watch on TikTok.',
-    href: 'https://www.tiktok.com/@karimyoussef666g',
-    status: 'ONLINE',
-    external: true
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
   }
 ]
 
@@ -368,7 +258,6 @@ const getSubmenuConfig = (mode: MenuMode): SubMenuConfig | null => {
         parentId: 'new-game',
         options: NEW_GAME_OPTIONS
       }
-<<<<<<< HEAD
     case 'botnet':
       return {
         key: 'botnet-menu',
@@ -378,8 +267,6 @@ const getSubmenuConfig = (mode: MenuMode): SubMenuConfig | null => {
         options: BOTNET_OPTIONS,
         categories: ['All', 'Core', 'Ops', 'Business', 'Entertainment']
       }
-=======
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
     case 'systems':
       return {
         key: 'connected-systems-menu',
@@ -391,19 +278,11 @@ const getSubmenuConfig = (mode: MenuMode): SubMenuConfig | null => {
       }
     case 'comms':
       return {
-<<<<<<< HEAD
         key: 'communication-channels-menu',
         title: 'COMMUNICATION CHANNELS',
         instructions: '[ use ↑ / ↓ or W / S to tune // enter to connect // esc to abort ]',
         parentId: 'communication-channels',
         options: COMMUNICATION_CHANNELS_OPTIONS
-=======
-        key: 'social-media-menu',
-        title: 'SOCIAL MEDIA',
-        instructions: '[ use ↑ / ↓ or W / S to tune // enter to connect // esc to abort ]',
-        parentId: 'social-media',
-        options: SOCIAL_MEDIA_OPTIONS
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
       }
     default:
       return null
@@ -425,7 +304,6 @@ const Hero: React.FC = () => {
   const [activeItemId, setActiveItemId] = useState<string>(BASE_MENU_ITEMS[0].id)
   const [menuMode, setMenuMode] = useState<MenuMode>('main')
   const [submenuSelectionIndex, setSubmenuSelectionIndex] = useState<number>(0)
-<<<<<<< HEAD
   const menuItems = useMemo<MenuItem[]>(() => {
     return BASE_MENU_ITEMS.map(item => {
       if (item.id !== 'login') {
@@ -445,9 +323,6 @@ const Hero: React.FC = () => {
       }
     })
   }, [isSignedIn])
-=======
-  const menuItems = useMemo<MenuItem[]>(() => BASE_MENU_ITEMS, [])
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
   const activeItem = menuItems.find(item => item.id === activeItemId) ?? menuItems[0]
 
   const navigate = useNavigate()
@@ -562,11 +437,7 @@ const Hero: React.FC = () => {
         description: selectedSubmenuOption.description,
         detail: submenuConfig.parentId === 'connected-systems'
           ? `[ ${formatCategory(selectedSubmenuOption.category ?? 'system')} ]`
-<<<<<<< HEAD
           : submenuConfig.parentId === 'communication-channels'
-=======
-          : submenuConfig.parentId === 'social-media'
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
             ? `Channel mode: ${formatCategory(selectedSubmenuOption.category ?? 'uplink')}`
           : 'Mission Directive: Confirm infiltration plan.',
         status: selectedSubmenuOption.status
@@ -589,13 +460,8 @@ const Hero: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center md:text-left"
         >
-<<<<<<< HEAD
           <p className="text-xs uppercase tracking-[0.6em] text-[#9fffa9] font-mono">KY OPS DIVISION</p>
           <h1 className="text-6xl md:text-8xl font-black tracking-[0.65em] text-[#fca311] mt-4">INTEGRATED APPS</h1>
-=======
-          <p className="text-xs uppercase tracking-[0.6em] text-[#9fffa9] font-mono">KY LIFE BLOG</p>
-          <h1 className="text-6xl md:text-8xl font-black tracking-[0.65em] text-[#fca311] mt-4">PORTFOLIO</h1>
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
           <p className="text-lg tracking-[0.5em] text-[#f5d67d]/80 font-mono mt-2">Build v0.3</p>
         </motion.div>
 
@@ -632,7 +498,6 @@ const Hero: React.FC = () => {
                         whileHover={{ x: 6 }}
                         onClick={(event) => {
                           setActiveItemId(item.id)
-<<<<<<< HEAD
                           if (item.id === 'login') {
                             event.preventDefault()
 
@@ -662,16 +527,6 @@ const Hero: React.FC = () => {
                               setMenuMode('newGame')
                             } else if (isBotnet) {
                               setMenuMode('botnet')
-=======
-                          const isNewGame = item.id === 'new-game'
-                          const isConnectedSystems = item.id === 'connected-systems'
-                          const isSocialMedia = item.id === 'social-media'
-
-                          if (isNewGame || isConnectedSystems || isSocialMedia) {
-                            event.preventDefault()
-                            if (isNewGame) {
-                              setMenuMode('newGame')
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
                             } else if (isConnectedSystems) {
                               setMenuMode('systems')
                             } else {
@@ -706,15 +561,15 @@ const Hero: React.FC = () => {
                   })}
                 </motion.div>
               ) : (
-                id: 'social-media',
-                label: 'SOCIAL MEDIA',
+                submenuConfig && (
+                  <motion.div
                     key={submenuConfig.key}
                     initial={{ opacity: 0, x: -25 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -25 }}
                     transition={{ duration: 0.2 }}
-                id: 'view-readme',
-                label: 'CONTACT INFORMATION',
+                    className="space-y-4"
+                  >
                     <div className="space-y-3 px-4">
                       <p className="text-xs font-mono uppercase tracking-[0.4em] text-[#f5d67d]/80">{submenuConfig.title}</p>
                       {submenuConfig.subtitle && (
@@ -733,8 +588,8 @@ const Hero: React.FC = () => {
                                 }`}
                               >
                                 {category}
-                                  id: 'wildrose-painters',
-                                  label: 'Wildrose Painters',
+                              </span>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -742,8 +597,8 @@ const Hero: React.FC = () => {
                     <div className="space-y-3">
                       {submenuConfig.options.map((option, index) => {
                         const isSelected = index === submenuSelectionIndex
-                                  id: 'kygroup',
-                                  label: 'KYgroup',
+                        const statusTone = getStatusTone(option.status)
+                        return (
                           <motion.button
                             key={option.id}
                             type="button"
@@ -751,8 +606,8 @@ const Hero: React.FC = () => {
                             onMouseEnter={() => setSubmenuSelectionIndex(index)}
                             onFocus={() => setSubmenuSelectionIndex(index)}
                             onClick={() => handleSubMenuSelect(option, submenuConfig.parentId)}
-                                  id: 'edmonton-cars',
-                                  label: 'Edmonton-cars.ca',
+                            className={`block w-full px-4 py-2 text-left text-lg font-semibold uppercase tracking-[0.4em] transition focus:outline-none ${
+                              isSelected
                                 ? 'text-[#f5d67d]'
                                 : 'text-[#fca311]/80 hover:text-[#fca311]'
                             }`}
@@ -801,7 +656,6 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="md:flex-1 space-y-6"
           >
-<<<<<<< HEAD
             <div className="border border-[#fca311]/40 bg-[#070707]/90 p-8 rounded-3xl shadow-[0_0_35px_rgba(252,163,17,0.18)] backdrop-blur">
               <p className="text-sm uppercase tracking-[0.4em] text-[#f5d67d]/80 font-mono">{activeDisplay.label}</p>
               <h2 className="mt-4 text-2xl md:text-3xl font-semibold text-[#f1f1f1] leading-snug">
@@ -813,23 +667,6 @@ const Hero: React.FC = () => {
                 <span>{activeDisplay.status}</span>
               </div>
             </div>
-=======
-            {activeItemId === 'view-readme' ? (
-              <ContactForm />
-            ) : (
-              <div className="border border-[#fca311]/40 bg-[#070707]/90 p-8 rounded-3xl shadow-[0_0_35px_rgba(252,163,17,0.18)] backdrop-blur">
-                <p className="text-sm uppercase tracking-[0.4em] text-[#f5d67d]/80 font-mono">{activeDisplay.label}</p>
-                <h2 className="mt-4 text-2xl md:text-3xl font-semibold text-[#f1f1f1] leading-snug">
-                  {activeDisplay.description}
-                </h2>
-                <p className="mt-6 text-sm text-[#9fffa9] uppercase tracking-[0.3em]">{activeDisplay.detail}</p>
-                <div className="mt-8 flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#b9b9b9]">
-                  <ChevronRight className="w-4 h-4 text-[#fca311]" />
-                  <span>{activeDisplay.status}</span>
-                </div>
-              </div>
-            )}
->>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
           </motion.div>
         </div>
 
