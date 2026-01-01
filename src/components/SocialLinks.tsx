@@ -55,7 +55,11 @@ const SocialLinks: React.FC = () => {
         >
           <div className="inline-block border border-[#fca311]/40 px-6 py-3 mb-4 bg-[#0b0b0b]/80">
             <h2 className="text-4xl md:text-5xl font-bold text-[#fca311] uppercase tracking-[0.45em]">
-              COMMUNICATION CHANNELS
+<<<<<<< HEAD
+              SOCIAL MEDIA
+=======
+              SOCIAL MEDIA
+>>>>>>> b4feee9 (All site updates: UI, content, links, and bug fixes)
             </h2>
           </div>
           <p className="text-xl text-[#b9b9b9] max-w-3xl mx-auto uppercase tracking-wide">
