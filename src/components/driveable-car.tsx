@@ -21,6 +21,7 @@ export function DriveableCar({ position, isPlayerInside, keysPressed, onTransfor
   const currentGearRef = useRef(1)
   const rpmRef = useRef(1000)
   const lastPosition = useMemo(() => new Vector3(), [])
+  const wasInsideRef = useRef(isPlayerInside)
 
   useEffect(() => {
     if (carRef.current) {
@@ -29,6 +30,14 @@ export function DriveableCar({ position, isPlayerInside, keysPressed, onTransfor
       onTransformChange?.(lastPosition, rotationRef.current)
     }
   }, [position, lastPosition, onTransformChange])
+
+  useEffect(() => {
+    if (wasInsideRef.current && !isPlayerInside) {
+      velocityRef.current.x = 0
+      velocityRef.current.z = 0
+    }
+    wasInsideRef.current = isPlayerInside
+  }, [isPlayerInside])
 
   useFrame((_, delta) => {
     if (!carRef.current) return
@@ -39,9 +48,9 @@ export function DriveableCar({ position, isPlayerInside, keysPressed, onTransfor
     const friction = 0.92
     const brakingForce = 0.85
 
-    const forward = (keysPressed.current["w"] ? 1 : 0) - (keysPressed.current["s"] ? 1 : 0)
-    const turn = (keysPressed.current["d"] ? 1 : 0) - (keysPressed.current["a"] ? 1 : 0)
-    const handbrake = keysPressed.current[" "]
+    const forward = isPlayerInside ? (keysPressed.current["w"] ? 1 : 0) - (keysPressed.current["s"] ? 1 : 0) : 0
+    const turn = isPlayerInside ? (keysPressed.current["d"] ? 1 : 0) - (keysPressed.current["a"] ? 1 : 0) : 0
+    const handbrake = isPlayerInside ? keysPressed.current[" "] : false
 
     if (isPlayerInside) {
       const currentSpeed = Math.hypot(velocityRef.current.x, velocityRef.current.z)

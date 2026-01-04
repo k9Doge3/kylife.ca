@@ -1,15 +1,24 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type MutableRefObject } from "react"
+import { Vector3 } from "three"
+
+type CarTransform = {
+  position: Vector3
+  rotationY: number
+}
 
 interface FPSHudProps {
   health?: number
   ammo?: number
   maxAmmo?: number
   money?: number
+  playerPositionRef?: MutableRefObject<Vector3>
+  carTransformRef?: MutableRefObject<CarTransform>
+  npcPosition?: Vector3
 }
 
-export function FPSHud({ health = 100, ammo = 30, maxAmmo = 30, money = 0 }: FPSHudProps) {
+export function FPSHud({ health = 100, ammo = 30, maxAmmo = 30, money = 0, playerPositionRef, carTransformRef, npcPosition }: FPSHudProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number | null>(null)
 
@@ -94,10 +103,44 @@ export function FPSHud({ health = 100, ammo = 30, maxAmmo = 30, money = 0 }: FPS
         minimapSize - roomPadding * 2
       )
 
-      ctx.fillStyle = "#ff0000"
-      ctx.beginPath()
-      ctx.arc(minimapX + minimapSize / 2, minimapY + minimapSize / 2, 4, 0, Math.PI * 2)
-      ctx.fill()
+      const innerSize = minimapSize - roomPadding * 2
+      const boundaryX = 60
+      const boundaryZ = 60
+      const clamp01 = (value: number) => Math.max(0, Math.min(1, value))
+      const worldToMinimap = (x: number, z: number) => {
+        const nx = clamp01((x + boundaryX) / (boundaryX * 2))
+        const nz = clamp01((z + boundaryZ) / (boundaryZ * 2))
+        return {
+          x: minimapX + roomPadding + nx * innerSize,
+          y: minimapY + roomPadding + (1 - nz) * innerSize,
+        }
+      }
+
+      const drawDot = (x: number, y: number, color: string, radius = 4) => {
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, y, radius, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      const playerPosition = playerPositionRef?.current
+      if (playerPosition) {
+        const p = worldToMinimap(playerPosition.x, playerPosition.z)
+        drawDot(p.x, p.y, "#ff0000", 4)
+      } else {
+        drawDot(minimapX + minimapSize / 2, minimapY + minimapSize / 2, "#ff0000", 4)
+      }
+
+      const carPosition = carTransformRef?.current?.position
+      if (carPosition) {
+        const c = worldToMinimap(carPosition.x, carPosition.z)
+        drawDot(c.x, c.y, "#60a5fa", 3)
+      }
+
+      if (npcPosition) {
+        const n = worldToMinimap(npcPosition.x, npcPosition.z)
+        drawDot(n.x, n.y, "#fbbf24", 3)
+      }
 
       animationFrameRef.current = requestAnimationFrame(draw)
     }
@@ -110,7 +153,7 @@ export function FPSHud({ health = 100, ammo = 30, maxAmmo = 30, money = 0 }: FPS
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [health, ammo, maxAmmo, money])
+  }, [health, ammo, maxAmmo, money, playerPositionRef, carTransformRef, npcPosition])
 
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10 w-full h-full" />
 }

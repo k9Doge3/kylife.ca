@@ -2,11 +2,11 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { PointerLockControls, Environment } from "@react-three/drei"
-import { useState, useEffect, useRef, useMemo, useCallback, type MutableRefObject } from "react"
+import { useState, useEffect, useRef, useMemo, useCallback, type MutableRefObject, type Dispatch, type SetStateAction } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Vector3, PositionalAudio, AudioListener, AudioLoader } from "three"
+import { Vector3, AudioListener } from "three"
 import { Map as MapIcon, X } from "lucide-react"
 import { FPSHud } from "@/components/fps-hud"
 import { DriveableCar } from "@/components/driveable-car"
@@ -99,14 +99,16 @@ type CarTransform = {
 
 interface FirstPersonPlayerProps {
   isInCar: boolean
+  paused: boolean
   carTransformRef: MutableRefObject<CarTransform>
   keysPressed: KeysRef
   onPositionChange: (position: Vector3) => void
 }
 
-function FirstPersonPlayer({ isInCar, carTransformRef, keysPressed, onPositionChange }: FirstPersonPlayerProps) {
+function FirstPersonPlayer({ isInCar, paused, carTransformRef, keysPressed, onPositionChange }: FirstPersonPlayerProps) {
   const { camera } = useThree()
   const velocityRef = useRef(new Vector3())
+  // positionRef is the player's "feet" position; the camera is offset upward.
   const positionRef = useRef(new Vector3(0, -3.4, 0))
   const isGroundedRef = useRef(true)
   const wasInCarRef = useRef(false)
@@ -129,6 +131,7 @@ function FirstPersonPlayer({ isInCar, carTransformRef, keysPressed, onPositionCh
   const basementFloor = -4
   const groundLevel = 0
   const basementMaxY = -1
+  const playerHeight = 1.6
 
   const stairX = 4
   const stairStartZ = 5.5
@@ -150,14 +153,19 @@ function FirstPersonPlayer({ isInCar, carTransformRef, keysPressed, onPositionCh
       const exitX = carTransform.position.x + exitOffset.x * cos + exitOffset.z * sin
       const exitZ = carTransform.position.z + exitOffset.z * cos - exitOffset.x * sin
       positionRef.current.set(exitX, groundLevel, exitZ)
-      camera.position.copy(positionRef.current)
+      camera.position.set(exitX, groundLevel + playerHeight, exitZ)
       onPositionChange(positionRef.current)
       velocityRef.current.set(0, 0, 0)
     }
     wasInCarRef.current = isInCar
-  }, [camera, carTransformRef, exitOffset, groundLevel, isInCar, onPositionChange])
+  }, [camera, carTransformRef, exitOffset, groundLevel, isInCar, onPositionChange, playerHeight])
 
   useFrame((_, delta) => {
+    if (paused) {
+      velocityRef.current.set(0, 0, 0)
+      return
+    }
+
     const carTransform = carTransformRef.current
 
     if (isInCar) {
@@ -240,7 +248,7 @@ function FirstPersonPlayer({ isInCar, carTransformRef, keysPressed, onPositionCh
       positionRef.current.y = nextY
     }
 
-    camera.position.copy(positionRef.current)
+    camera.position.set(positionRef.current.x, positionRef.current.y + playerHeight, positionRef.current.z)
     onPositionChange(positionRef.current)
   })
 
@@ -249,50 +257,132 @@ function FirstPersonPlayer({ isInCar, carTransformRef, keysPressed, onPositionCh
 
 interface OutdoorSceneProps {
   playerPositionRef: MutableRefObject<Vector3>
+  carTransformRef: MutableRefObject<CarTransform>
+  npcWorldPosition: Vector3
+  paused: boolean
+  isInCar: boolean
+  setIsInCar: Dispatch<SetStateAction<boolean>>
   onNPCInteract: () => void
 }
 
-function OutdoorScene({ playerPositionRef, onNPCInteract }: OutdoorSceneProps) {
-  const [isInCar, setIsInCar] = useState(false)
+function OutdoorScene({ playerPositionRef, carTransformRef, npcWorldPosition, paused, isInCar, setIsInCar, onNPCInteract }: OutdoorSceneProps) {
   const keysPressed = useRef<Record<string, boolean>>({})
-  const carTransformRef = useRef<CarTransform>({ position: new Vector3(0, 0, 10), rotationY: 0 })
   const { camera } = useThree()
-  const audioRef = useRef<PositionalAudio | null>(null)
-  const npcWorldPosition = useMemo(() => new Vector3(-3, -4.4, 2), [])
+  const audioStateRef = useRef<{
+    listener: AudioListener
+    gain: GainNode
+    oscillators: OscillatorNode[]
+    filter: BiquadFilterNode
+    started: boolean
+  } | null>(null)
 
   useEffect(() => {
     const listener = new AudioListener()
     camera.add(listener)
-    const audio = new PositionalAudio(listener)
-    const loader = new AudioLoader()
-    loader.load(
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gucci%20Mane%20-%20Now%20It%27s%20Real%20%5BOfficial%20Music%20Video%5D-k2T1VgEqKXpNlTaw5VLUW0NedCCE1T.mp3",
-      (buffer) => {
-        audio.setBuffer(buffer)
-        audio.setRefDistance(10)
-        audio.setLoop(true)
-        audio.setVolume(0.35)
-        audio.play()
+
+    const context = listener.context
+    const gain = context.createGain()
+    gain.gain.value = 0
+
+    const filter = context.createBiquadFilter()
+    filter.type = "lowpass"
+    filter.frequency.value = 1100
+    filter.Q.value = 0.7
+
+    filter.connect(gain)
+    gain.connect(context.destination)
+
+    const osc1 = context.createOscillator()
+    osc1.type = "sawtooth"
+    osc1.frequency.value = 55
+    const osc2 = context.createOscillator()
+    osc2.type = "triangle"
+    osc2.frequency.value = 110
+
+    const oscGain1 = context.createGain()
+    oscGain1.gain.value = 0.04
+    const oscGain2 = context.createGain()
+    oscGain2.gain.value = 0.03
+
+    osc1.connect(oscGain1)
+    osc2.connect(oscGain2)
+    oscGain1.connect(filter)
+    oscGain2.connect(filter)
+
+    audioStateRef.current = {
+      listener,
+      gain,
+      oscillators: [osc1, osc2],
+      filter,
+      started: false,
+    }
+
+    const startAudio = async () => {
+      const state = audioStateRef.current
+      if (!state || state.started) return
+
+      try {
+        await context.resume()
+      } catch {
+        // ignore
       }
-    )
-    audioRef.current = audio
+
+      const now = context.currentTime
+      state.oscillators.forEach((osc) => osc.start(now))
+      state.started = true
+
+      const targetVolume = isInCar ? 0.08 : 0.05
+      state.gain.gain.setTargetAtTime(targetVolume, now, 0.04)
+    }
+
+    // "Autoplay" is often blocked until a user gesture; start as soon as the browser allows.
+    void startAudio()
+    window.addEventListener("pointerdown", startAudio, { once: true })
+    window.addEventListener("keydown", startAudio, { once: true })
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.stop()
-      }
       camera.remove(listener)
+
+      const state = audioStateRef.current
+      audioStateRef.current = null
+      if (state) {
+        try {
+          state.oscillators.forEach((osc) => osc.stop())
+        } catch {
+          // ignore
+        }
+        try {
+          state.gain.disconnect()
+          state.filter.disconnect()
+        } catch {
+          // ignore
+        }
+      }
+
+      window.removeEventListener("pointerdown", startAudio)
+      window.removeEventListener("keydown", startAudio)
     }
-  }, [camera])
+  }, [camera, isInCar])
 
   useEffect(() => {
-    if (!audioRef.current) return
-    audioRef.current.setVolume(isInCar ? 0.7 : 0.35)
+    const state = audioStateRef.current
+    if (!state || !state.started) return
+    const now = state.listener.context.currentTime
+    const targetVolume = isInCar ? 0.08 : 0.05
+    state.gain.gain.setTargetAtTime(targetVolume, now, 0.04)
   }, [isInCar])
+
+  useEffect(() => {
+    if (!paused) return
+    keysPressed.current = {}
+  }, [paused])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase()
+
+      if (paused) return
+
       keysPressed.current[key] = true
 
       if (key === "e") {
@@ -313,13 +403,21 @@ function OutdoorScene({ playerPositionRef, onNPCInteract }: OutdoorSceneProps) {
       keysPressed.current[event.key.toLowerCase()] = false
     }
 
+    const clearKeys = () => {
+      keysPressed.current = {}
+    }
+
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
+    window.addEventListener("blur", clearKeys)
+    document.addEventListener("visibilitychange", clearKeys)
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
+      window.removeEventListener("blur", clearKeys)
+      document.removeEventListener("visibilitychange", clearKeys)
     }
-  }, [camera, npcWorldPosition, onNPCInteract])
+  }, [camera, npcWorldPosition, onNPCInteract, paused])
 
   const handlePositionChange = useCallback(
     (position: Vector3) => {
@@ -351,16 +449,13 @@ function OutdoorScene({ playerPositionRef, onNPCInteract }: OutdoorSceneProps) {
           onTransformChange={(position, rotationY) => {
             carTransformRef.current.position.copy(position)
             carTransformRef.current.rotationY = rotationY
-            if (audioRef.current) {
-              audioRef.current.position.copy(position)
-            }
           }}
         />
-        {audioRef.current && <primitive object={audioRef.current} />}
       </group>
 
       <FirstPersonPlayer
         isInCar={isInCar}
+        paused={paused}
         carTransformRef={carTransformRef}
         keysPressed={keysPressed}
         onPositionChange={handlePositionChange}
@@ -380,7 +475,11 @@ export function BasementTracker() {
   const [health] = useState(100)
   const [ammo] = useState(30)
   const [money, setMoney] = useState(0)
+  const [isInCar, setIsInCar] = useState(false)
+  const npcWorldPosition = useMemo(() => new Vector3(-3, -4.4, 2), [])
   const playerPositionRef = useRef(new Vector3(0, -3.4, 0))
+  const carTransformRef = useRef<CarTransform>({ position: new Vector3(0, 0, 10), rotationY: 0 })
+  const [interactionHint, setInteractionHint] = useState<string | null>(null)
 
   const activeRegion = useMemo(
     () => basementRegions.find((region) => region.id === focusedZone) ?? basementRegions[0],
@@ -422,13 +521,55 @@ export function BasementTracker() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [mapOpen])
 
+  useEffect(() => {
+    if (!mapOpen) return
+    try {
+      document.exitPointerLock?.()
+    } catch {
+      // no-op
+    }
+  }, [mapOpen])
+
   const handleNPCInteract = useCallback(() => {
     setMoney((prev) => prev + 100)
   }, [])
 
+  useEffect(() => {
+    const updateHint = () => {
+      if (mapOpen) {
+        setInteractionHint("Map open · input paused")
+        return
+      }
+
+      if (isInCar) {
+        setInteractionHint("Press E to exit car")
+        return
+      }
+
+      const playerPosition = playerPositionRef.current
+      const distanceToCar = playerPosition.distanceTo(carTransformRef.current.position)
+      if (distanceToCar < 5) {
+        setInteractionHint("Press E to enter car")
+        return
+      }
+
+      const distanceToNpc = playerPosition.distanceTo(npcWorldPosition)
+      if (distanceToNpc < 2.5) {
+        setInteractionHint("Press E to talk")
+        return
+      }
+
+      setInteractionHint(null)
+    }
+
+    updateHint()
+    const interval = window.setInterval(updateHint, 120)
+    return () => window.clearInterval(interval)
+  }, [isInCar, mapOpen, npcWorldPosition])
+
   return (
     <div className="relative w-full h-screen">
-      <FPSHud health={health} ammo={ammo} maxAmmo={30} money={money} />
+      <FPSHud health={health} ammo={ammo} maxAmmo={30} money={money} playerPositionRef={playerPositionRef} carTransformRef={carTransformRef} npcPosition={npcWorldPosition} />
 
       <Canvas
         camera={{ position: [0, 1.6, 5], fov: 75 }}
@@ -436,7 +577,15 @@ export function BasementTracker() {
         gl={{ antialias: false, powerPreference: "high-performance" }}
         dpr={[1, 1.5]}
       >
-        <OutdoorScene playerPositionRef={playerPositionRef} onNPCInteract={handleNPCInteract} />
+        <OutdoorScene
+          playerPositionRef={playerPositionRef}
+          carTransformRef={carTransformRef}
+          npcWorldPosition={npcWorldPosition}
+          paused={mapOpen}
+          isInCar={isInCar}
+          setIsInCar={setIsInCar}
+          onNPCInteract={handleNPCInteract}
+        />
       </Canvas>
 
       <div className="absolute top-4 left-4 right-4 flex flex-col gap-2 pointer-events-none">
@@ -483,6 +632,7 @@ export function BasementTracker() {
           <p className="text-[9px] text-muted-foreground">
             🎮 Click to lock mouse • WASD to move • SHIFT to sprint • SPACE to jump • E to enter/exit car • ESC to unlock • Press M for map overlay
           </p>
+          {interactionHint && <p className="mt-1 text-[9px] text-slate-200 font-mono">{interactionHint}</p>}
         </Card>
       </div>
 
