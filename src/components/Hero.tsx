@@ -88,6 +88,86 @@ const NEW_GAME_OPTIONS: SubMenuOption[] = [
     description: 'Dive directly into the Basement simulation to inspect subterranean anomalies.',
     href: '/basement',
     status: 'Simulation: Active'
+  },
+  {
+    id: 'half-life-1',
+    label: 'HALF-LIFE 1',
+    description: 'Launch the original Black Mesa incident with multiplayer access.',
+    href: 'https://dos.zone/hldm/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'quake-iii-arena',
+    label: 'QUAKE III ARENA',
+    description: 'Enter the arena and test reflexes in a high-speed frag simulation.',
+    href: 'https://dos.zone/q3/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'comanche-2',
+    label: 'COMANCHE 2',
+    description: 'Pilot advanced rotorcraft through classified combat exercises.',
+    href: 'https://dos.zone/comanche2/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'age-of-empires-ii',
+    label: 'AGE OF EMPIRES II',
+    description: 'Command your civilization through a full-scale strategy simulation.',
+    href: 'https://dos.zone/age-of-empires2/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'need-for-speed',
+    label: 'NEED FOR SPEED',
+    description: 'Deploy to high-speed pursuit scenarios across global circuits.',
+    href: 'https://dos.zone/the-need-for-speed-sep-1995/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'doom-2',
+    label: 'DOOM 2',
+    description: 'Clear hostile sectors and secure the exit point.',
+    href: 'https://dos.zone/doom-ii-oct-10-1994/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'red-baron',
+    label: 'RED BARON',
+    description: 'Engage in aerial dogfights across historic war zones.',
+    href: 'https://dos.zone/red-baron-eng/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'gta-2',
+    label: 'GTA 2',
+    description: 'Navigate urban operations with full tactical freedom.',
+    href: 'https://dos.zone/grand-theft-auto2/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'pinball-space-cadet',
+    label: 'PINBALL: SPACE CADET',
+    description: 'Enter orbital pinball trials for morale and reflex calibration.',
+    href: 'https://dos.zone/microsoft-3d-pinball-space-cadet/',
+    status: 'Simulation: Online',
+    external: true
+  },
+  {
+    id: 'unreal-tournament-99',
+    label: 'UNREAL TOURNAMENT 99',
+    description: 'Compete in a live-fire arena tournament.',
+    href: 'https://dos.zone/ut99/',
+    status: 'Simulation: Online',
+    external: true
   }
 ]
 
