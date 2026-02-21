@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.53.8",
+    "@vercel/analytics": "^1.5.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "class-variance-authority": "^0.7.1",
